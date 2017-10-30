@@ -1,27 +1,27 @@
-#Bluetooth Scan and Communication Made Easy!
+Bluetooth Scan and Communication Made Easy!
+=======
 
 The library provides easy to use bluetooth scanner and picker as well as connection manager.
 
-##How to use
+How to use
+------------------------
 
-
-```
+```groovy
 repositories {
-    ....
     maven {
         url "https://jitpack.io"
     }
 }
 
 dependencies {
-    ....
     compile 'com.github.KasemJaffer:bluetooth_utils:1.0.0'
 }
 ```
 
-####To scan and pick bluetooth device
+To scan and pick bluetooth device
+------------------------
 
-```
+```java
 public class MainActivity extends AppCompatActivity implements
         BluetoothDeviceDialogListener,
         BluetoothChatServiceListener {
@@ -59,9 +59,10 @@ public class MainActivity extends AppCompatActivity implements
 }
 ```
 
-####To establish a connection to a BT device
+To establish a connection to a BT device
+------------------------
 
-```
+```java
 public class MainActivity extends AppCompatActivity implements BluetoothChatServiceListener {
         
    private BluetoothChatManager bService;
@@ -114,9 +115,10 @@ public class MainActivity extends AppCompatActivity implements BluetoothChatServ
 }
 ```
 
-####To broadcast unlimited data using BLE advertising (Requires API level 21)
+To broadcast unlimited data using BLE advertising (Requires API level 21)
+------------------------
 
-```
+```java
 public class MainActivity extends AppCompatActivity  implements BleAdvertiseManager.AdvertiseResultInterface {
 
 private final ParcelUuid serviceDataUUID = new ParcelUuid(UUID.fromString("00001111-0000-1000-8000-00805f9b34fb"));
@@ -147,9 +149,10 @@ private AdvertiseManager advertiser;
 }
 ```
 
-####To scan and receive advertised data (Requires API level 18)
+To scan and receive advertised data (Requires API level 18)
+------------------------
 
-```
+```java
 public class MainActivity extends AppCompatActivity implements BleScanManager.ScanResultInterface {
 
 private final ParcelUuid serviceDataUUID = new ParcelUuid(UUID.fromString("00001111-0000-1000-8000-00805f9b34fb"));
