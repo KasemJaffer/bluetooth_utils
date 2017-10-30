@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/bluetoothutils.iml" filepath="$PROJECT_DIR$/bluetoothutils.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bluetoothutils.iml" filepath="$PROJECT_DIR$/.idea/modules/bluetoothutils.iml" />
+      <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
     </modules>
   </component>
 </project>
