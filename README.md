@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.KasemJaffer:bluetooth_utils:1.0.1'
+    compile 'com.github.KasemJaffer:bluetooth_utils:1.0.2'
 }
 ```
 
@@ -129,7 +129,7 @@ private AdvertiseManager advertiser;
        super.onCreate(savedInstanceState);
        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
        
-       advertiser = new AdvertiseManager(this, serviceDataUUID, this);
+       advertiser = new BleAdvertiseManager(this, serviceDataUUID, this);
        
    }
                 
@@ -163,7 +163,7 @@ private ScanManager scanner;
        super.onCreate(savedInstanceState);
        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
        
-       scanner = new ScanManager(this, serviceDataUUID, this);
+       scanner = new BleScanManager(this, serviceDataUUID, this);
        
    }
                 
