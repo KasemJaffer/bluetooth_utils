@@ -1,10 +1,10 @@
-Bluetooth Scan and Communication Made Easy!
-=======
-
 ![Release](https://jitpack.io/v/KasemJaffer/bluetooth_utils.svg)
 (https://jitpack.io/#KasemJaffer/bluetooth_utils)
 
-The library provides easy to use bluetooth scanner and picker as well as connection manager.
+Bluetooth Scan and Communication Made Easy!
+=======
+
+This library provides easy to use bluetooth scanner and picker as well as connection manager.
 
 How to use
 ------------------------
