@@ -47,29 +47,7 @@ public class BleScanManager {
     private final byte[] hash = new byte[4];
     private byte[][] data;
     private int currentHashCode;
-    private ScanCallback scanCallback = new ScanCallback() {
-        @Override
-        public void onScanResult(int callbackType, ScanResult result) {
-            super.onScanResult(callbackType, result);
-            parseScanResult(result);
-        }
-
-        public void onBatchScanResults(List<ScanResult> results) {
-            super.onBatchScanResults(results);
-            for (ScanResult r : results) {
-                parseScanResult(r);
-            }
-        }
-
-        @Override
-        public void onScanFailed(int errorCode) {
-            super.onScanFailed(errorCode);
-            stopScan();
-            if (scanResultInterface != null) {
-                scanResultInterface.onScanFailed(getError(errorCode));
-            }
-        }
-    };
+    private ScanCallback scanCallback;
 
     /**
      * Constructs a {@link BleScanManager}
@@ -85,10 +63,34 @@ public class BleScanManager {
         this.serviceDataUUID = serviceDataUUID;
         this.scanResultInterface = scanResultInterface;
         this.scanner = BluetoothLeScannerCompat.getScanner();
-
         if (scanner == null) {
             throw new Exception("Bluetooth not enabled or not supported. Try again after you enable the BT.");
         }
+
+        this.scanCallback = new ScanCallback() {
+            @Override
+            public void onScanResult(int callbackType, ScanResult result) {
+                super.onScanResult(callbackType, result);
+                parseScanResult(result);
+            }
+
+            public void onBatchScanResults(List<ScanResult> results) {
+                super.onBatchScanResults(results);
+                for (ScanResult r : results) {
+                    parseScanResult(r);
+                }
+            }
+
+            @Override
+            @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+            public void onScanFailed(int errorCode) {
+                super.onScanFailed(errorCode);
+                stopScan();
+                if (BleScanManager.this.scanResultInterface != null) {
+                    BleScanManager.this.scanResultInterface.onScanFailed(getError(errorCode));
+                }
+            }
+        };
         this.filters = new ArrayList<>();
         this.filters.add(new ScanFilter.Builder().setServiceUuid(serviceDataUUID).build());
         this.settings = new ScanSettings.Builder()
@@ -121,6 +123,7 @@ public class BleScanManager {
             }
 
             @Override
+            @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
             public void onActivityDestroyed(Activity activity) {
                 if (BleScanManager.this.activity == activity) {
                     stopScan();

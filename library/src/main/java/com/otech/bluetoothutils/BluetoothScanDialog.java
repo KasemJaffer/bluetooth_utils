@@ -60,26 +60,27 @@ public class BluetoothScanDialog extends DialogFragment {
     private ProgressBar progressBar;
     private UIOptions options;
     private boolean makeDiscoverable = false;
+    private AdapterView.OnItemClickListener mDeviceClickListener;
 
-    private AdapterView.OnItemClickListener mDeviceClickListener
-            = new AdapterView.OnItemClickListener() {
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
+    public BluetoothScanDialog() {
+        this.mDeviceClickListener = new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+                // Cancel discovery because it's costly and we're about to connect
+                mBtAdapter.cancelDiscovery();
 
-        public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
-            // Cancel discovery because it's costly and we're about to connect
-            mBtAdapter.cancelDiscovery();
-
-            // Get the device MAC address, which is the last 17 chars in the View
-            String info = ((TextView) v).getText().toString();
-            String[] infos = info.split("\n");
-            if (infos.length == 2) {
-                String name = infos[0];
-                String address = infos[1];
-                ((BluetoothDeviceDialogListener) activity).onDeviceSelected(name, address);
-                dismiss();
+                // Get the device MAC address, which is the last 17 chars in the View
+                String info = ((TextView) v).getText().toString();
+                String[] infos = info.split("\n");
+                if (infos.length == 2) {
+                    String name = infos[0];
+                    String address = infos[1];
+                    ((BluetoothDeviceDialogListener) activity).onDeviceSelected(name, address);
+                    dismiss();
+                }
             }
-
-        }
-    };
+        };
+    }
 
 
     @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})

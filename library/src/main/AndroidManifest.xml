@@ -2,9 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.otech.bluetoothutils">
 
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
     <uses-sdk tools:overrideLibrary="no.nordicsemi.android.support.v18.scanner" />
 
     <application>
