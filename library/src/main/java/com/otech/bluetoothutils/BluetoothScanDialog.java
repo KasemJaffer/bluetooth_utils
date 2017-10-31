@@ -83,7 +83,10 @@ public class BluetoothScanDialog extends DialogFragment {
     }
 
 
-    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
+    @RequiresPermission(allOf = {
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.ACCESS_COARSE_LOCATION})
     public static BluetoothScanDialog show(AppCompatActivity context, UIOptions options, boolean makeBluetoothDiscoverable) {
         if (!(context instanceof BluetoothDeviceDialogListener)) {
             throw new UnsupportedOperationException("Activity must implement OnBluetoothDeviceSelectedListener");
@@ -134,7 +137,6 @@ public class BluetoothScanDialog extends DialogFragment {
                 ((BluetoothDeviceDialogListener) activity).discoveryStarted();
             }
         });
-
     }
 
     @NonNull
