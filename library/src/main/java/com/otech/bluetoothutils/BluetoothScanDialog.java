@@ -16,6 +16,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresPermission;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -62,6 +63,7 @@ public class BluetoothScanDialog extends DialogFragment {
 
     private AdapterView.OnItemClickListener mDeviceClickListener
             = new AdapterView.OnItemClickListener() {
+
         public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
             // Cancel discovery because it's costly and we're about to connect
             mBtAdapter.cancelDiscovery();
@@ -80,6 +82,7 @@ public class BluetoothScanDialog extends DialogFragment {
     };
 
 
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
     public static BluetoothScanDialog show(AppCompatActivity context, UIOptions options, boolean makeBluetoothDiscoverable) {
         if (!(context instanceof BluetoothDeviceDialogListener)) {
             throw new UnsupportedOperationException("Activity must implement OnBluetoothDeviceSelectedListener");
@@ -181,6 +184,7 @@ public class BluetoothScanDialog extends DialogFragment {
         return builder.create();
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     private void updateUI(boolean scanning) {
         if (scanning) {
             title.setText(options.titleWhenScanning);
@@ -213,6 +217,7 @@ public class BluetoothScanDialog extends DialogFragment {
     }
 
     @Override
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void onDismiss(DialogInterface dialog) {
         stopDiscovery();
         super.onDismiss(dialog);
@@ -346,6 +351,7 @@ public class BluetoothScanDialog extends DialogFragment {
         return parentLayout;
     }
 
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
     private boolean startDiscovery() {
         Log.d(TAG, "doDiscovery()");
 
@@ -375,6 +381,7 @@ public class BluetoothScanDialog extends DialogFragment {
         return doDiscovery();
     }
 
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
     public boolean doDiscovery() {
 
         updateUI(true);
@@ -383,6 +390,7 @@ public class BluetoothScanDialog extends DialogFragment {
         return mBluetoothScanManager.startDiscovery();
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void stopDiscovery() {
         Log.d(TAG, "stopDiscovery()");
 

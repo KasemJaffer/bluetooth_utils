@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.RequiresPermission;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -78,6 +79,7 @@ public class BleScanManager {
      * @param scanResultInterface Bluetooth LE scan callbacks. Scan results are reported using this callback.
      * @throws Exception Will throw exception if Bluetooth is turned off or if Bluetooth LE Scan is not supported on this device.
      */
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH})
     public BleScanManager(Activity activity, ParcelUuid serviceDataUUID, ScanResultInterface scanResultInterface) throws Exception {
         this.activity = activity;
         this.serviceDataUUID = serviceDataUUID;
@@ -132,6 +134,7 @@ public class BleScanManager {
      *
      * @return Error message if there is.
      */
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.BLUETOOTH})
     public String startScan() {
         try {
             scanner.startScan(filters, settings, scanCallback);
@@ -144,6 +147,7 @@ public class BleScanManager {
     /**
      * Stops scanning for BLE advertisers.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void stopScan() {
         if (scanner != null) {
             scanner.stopScan(scanCallback);

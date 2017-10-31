@@ -1,11 +1,13 @@
 package com.otech.bluetoothutils;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.annotation.RequiresPermission;
 import android.util.Log;
 
 import java.util.Set;
@@ -73,6 +75,7 @@ public class BluetoothScanManager {
     /**
      * Start device discover with the BluetoothAdapter
      */
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
     public boolean startDiscovery() {
         Log.d(TAG, "doDiscovery()");
 
@@ -88,6 +91,7 @@ public class BluetoothScanManager {
     /**
      * Stop device discovery
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void stopDiscovery() {
         Log.d(TAG, "stopDiscovery()");
 
@@ -103,6 +107,7 @@ public class BluetoothScanManager {
     /**
      * Get paired devices
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public Set<BluetoothDevice> getBondedDevices() {
         return mBtAdapter.getBondedDevices();
     }

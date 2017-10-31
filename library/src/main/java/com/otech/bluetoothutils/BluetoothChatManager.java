@@ -16,6 +16,7 @@
 
 package com.otech.bluetoothutils;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
@@ -23,6 +24,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.support.annotation.RequiresPermission;
 import android.util.Log;
 
 import java.io.IOException;
@@ -106,6 +108,7 @@ public class BluetoothChatManager {
      * Start the chat service. Specifically start AcceptThread to begin a
      * session in listening (server) mode. Called by the Activity onResume()
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public synchronized void start() {
         Log.d(TAG, "start");
 
@@ -139,6 +142,7 @@ public class BluetoothChatManager {
      * @param device The BluetoothDevice to connect
      * @param secure Socket Security type - Secure (true) , Insecure (false)
      */
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
     public synchronized void connect(BluetoothDevice device, boolean secure) {
         Log.d(TAG, "connect to: " + device);
 
@@ -206,6 +210,7 @@ public class BluetoothChatManager {
     /**
      * Makes this device discoverable.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public void ensureDiscoverable() {
         if (mAdapter.getScanMode() !=
                 BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
@@ -221,6 +226,7 @@ public class BluetoothChatManager {
      * @param address Device address.
      * @param secure  Socket Security type - Secure (true) , Insecure (false)
      */
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
     public void connectDevice(String address, boolean secure) {
         // Get the BluetoothDevice object
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
@@ -234,6 +240,7 @@ public class BluetoothChatManager {
      * @param socket The BluetoothSocket on which the connection was made
      * @param device The BluetoothDevice that has been connected
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     private synchronized void connected(BluetoothSocket socket, final BluetoothDevice
             device, final String socketType) {
         Log.d(TAG, "connected, Socket Type:" + socketType);
@@ -281,6 +288,7 @@ public class BluetoothChatManager {
     /**
      * Indicate that the connection attempt failed and notify the UI Activity.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     private void connectionFailed() {
         // Send a failure message back to the Activity
         if (listener != null) {
@@ -300,6 +308,7 @@ public class BluetoothChatManager {
     /**
      * Indicate that the connection was lost and notify the UI Activity.
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     private void connectionLost() {
         // Send a failure message back to the Activity
         if (listener != null) {
@@ -377,6 +386,7 @@ public class BluetoothChatManager {
         private final BluetoothServerSocket mmServerSocket;
         private String mSocketType;
 
+        @RequiresPermission(Manifest.permission.BLUETOOTH)
         public AcceptThread(boolean secure) {
             BluetoothServerSocket tmp = null;
             mSocketType = secure ? "Secure" : "Insecure";
@@ -396,6 +406,7 @@ public class BluetoothChatManager {
             mmServerSocket = tmp;
         }
 
+        @RequiresPermission(Manifest.permission.BLUETOOTH)
         public void run() {
 
             Log.d(TAG, "Socket Type: " + mSocketType + "BEGIN mAcceptThread" + this);
@@ -459,10 +470,12 @@ public class BluetoothChatManager {
         private final BluetoothDevice mmDevice;
         private String mSocketType;
 
+        @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
         ConnectThread(BluetoothDevice device, boolean secure) {
             mmDevice = device;
             BluetoothSocket tmp = null;
             mSocketType = secure ? "Secure" : "Insecure";
+
 
             // Get a BluetoothSocket for a connection with the
             // given BluetoothDevice
@@ -479,6 +492,7 @@ public class BluetoothChatManager {
         }
 
         @Override
+        @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
         public void run() {
             Log.i(TAG, "BEGIN mConnectThread SocketType:" + mSocketType);
             setName("ConnectThread" + mSocketType);
@@ -523,6 +537,7 @@ public class BluetoothChatManager {
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
 
+        @RequiresPermission(Manifest.permission.BLUETOOTH)
         ConnectedThread(BluetoothSocket socket, String socketType) {
             Log.d(TAG, "create ConnectedThread: " + socketType);
             mmSocket = socket;
@@ -542,6 +557,7 @@ public class BluetoothChatManager {
         }
 
         @Override
+        @RequiresPermission(Manifest.permission.BLUETOOTH)
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
 

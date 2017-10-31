@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.KasemJaffer:bluetooth_utils:1.0.2'
+    compile 'com.github.KasemJaffer:bluetooth_utils:1.0.3'
 }
 ```
 
