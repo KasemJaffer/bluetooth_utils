@@ -186,8 +186,8 @@ public class BluetoothChatManager {
     /**
      * Stop all threads
      */
-    public synchronized void stop() {
-        Log.d(TAG, "stop");
+    public synchronized void stopAll() {
+        Log.d(TAG, "stopAll");
 
         if (mConnectThread != null) {
             mConnectThread.interrupt();
