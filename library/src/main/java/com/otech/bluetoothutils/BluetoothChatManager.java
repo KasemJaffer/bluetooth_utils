@@ -45,10 +45,6 @@ public class BluetoothChatManager {
     // Debugging
     private final String TAG = "BluetoothChatManager";
 
-    // Unique UUID for this application
-    private final UUID MY_UUID_SECURE = UUID.fromString("fa87c0d0-afac-11de-8a39-0800212c9a66");
-    private final UUID MY_UUID_INSECURE = UUID.fromString("8ce255c0-200a-11e0-ac64-0800212c9a66");
-
     // Member fields
     private final int headerLength = 4;
     private final BluetoothAdapter mAdapter;
@@ -107,9 +103,10 @@ public class BluetoothChatManager {
     /**
      * Start the chat service. Specifically start AcceptThread to begin a
      * session in listening (server) mode. Called by the Activity onResume()
+     * @param uuid Unique UUID to listen to
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public synchronized void start() {
+    public synchronized void startListening(UUID uuid) {
         Log.d(TAG, "start");
 
         // Cancel any thread attempting to make a connection
@@ -132,7 +129,7 @@ public class BluetoothChatManager {
         setState(BluetoothChatServiceState.STATE_LISTEN);
 
         // Start the thread to listen on a BluetoothServerSocket
-        mInsecureAcceptThread = new AcceptThread(false);
+        mInsecureAcceptThread = new AcceptThread(uuid, false);
         mInsecureAcceptThread.start();
     }
 
@@ -143,7 +140,7 @@ public class BluetoothChatManager {
      * @param secure Socket Security type - Secure (true) , Insecure (false)
      */
     @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
-    public synchronized void connect(BluetoothDevice device, boolean secure) {
+    public synchronized void connect(BluetoothDevice device, UUID uuid, boolean secure) {
         Log.d(TAG, "connect to: " + device);
 
         // Cancel any thread attempting to make a connection
@@ -161,7 +158,7 @@ public class BluetoothChatManager {
         }
 
         // Start the thread to connect with the given device
-        mConnectThread = new ConnectThread(device, secure);
+        mConnectThread = new ConnectThread(device, uuid, secure);
         mConnectThread.start();
         setState(BluetoothChatServiceState.STATE_CONNECTING);
     }
@@ -169,7 +166,7 @@ public class BluetoothChatManager {
     /**
      * Stop all threads
      */
-    public synchronized void stop() {
+    public synchronized void stopAll() {
         Log.d(TAG, "stop");
 
         if (mConnectThread != null) {
@@ -224,14 +221,15 @@ public class BluetoothChatManager {
      * Establish connection with other divice
      *
      * @param address Device address.
+     * @param uuid Connect using this uuid.
      * @param secure  Socket Security type - Secure (true) , Insecure (false)
      */
     @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
-    public void connectDevice(String address, boolean secure) {
+    public void connectDevice(String address, UUID uuid, boolean secure) {
         // Get the BluetoothDevice object
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
         // Attempt to connect to the device
-        connect(device, secure);
+        connect(device, uuid, secure);
     }
 
     /**
@@ -242,7 +240,7 @@ public class BluetoothChatManager {
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     private synchronized void connected(BluetoothSocket socket, final BluetoothDevice
-            device, final String socketType) {
+            device, final String socketType, UUID uuid) {
         Log.d(TAG, "connected, Socket Type:" + socketType);
 
         // Cancel the thread that completed the connection
@@ -268,7 +266,7 @@ public class BluetoothChatManager {
         }
 
         // Start the thread to manage the connection and perform transmissions
-        mConnectedThread = new ConnectedThread(socket, socketType);
+        mConnectedThread = new ConnectedThread(socket, socketType, uuid);
         mConnectedThread.start();
 
         // Send the name of the connected device back to the UI Activity
@@ -289,40 +287,40 @@ public class BluetoothChatManager {
      * Indicate that the connection attempt failed and notify the UI Activity.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    private void connectionFailed() {
+    private void connectionFailed(UUID uuid) {
         // Send a failure message back to the Activity
         if (listener != null) {
             mainThread.post(new Runnable() {
                 @Override
                 public void run() {
-                    listener.chatServiceLog("Unable to connect device");
+                    listener.chatError("Unable to connect device");
                 }
             });
         }
 
 
         // Start the service over to restart listening mode
-        BluetoothChatManager.this.start();
+        BluetoothChatManager.this.startListening(uuid);
     }
 
     /**
      * Indicate that the connection was lost and notify the UI Activity.
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    private void connectionLost() {
+    private void connectionLost(UUID uuid) {
         // Send a failure message back to the Activity
         if (listener != null) {
             mainThread.post(new Runnable() {
                 @Override
                 public void run() {
-                    listener.chatServiceLog("Device connection was lost");
+                    listener.chatError("Device connection was lost");
                 }
             });
         }
 
 
         // Start the service over to restart listening mode
-        BluetoothChatManager.this.start();
+        BluetoothChatManager.this.startListening(uuid);
     }
 
     private byte[] readBytes(InputStream inStream, byte[] headerBuffer, byte[] bodyBuffer) throws IOException {
@@ -373,7 +371,7 @@ public class BluetoothChatManager {
 
         void chatServiceConnectedTo(BluetoothDevice device);
 
-        void chatServiceLog(String log);
+        void chatError(String message);
     }
 
     /**
@@ -384,21 +382,21 @@ public class BluetoothChatManager {
     private class AcceptThread extends Thread {
         // The local server socket
         private final BluetoothServerSocket mmServerSocket;
+        private final UUID uuid;
         private String mSocketType;
 
         @RequiresPermission(Manifest.permission.BLUETOOTH)
-        public AcceptThread(boolean secure) {
+        public AcceptThread(UUID uuid, boolean secure) {
+            this.uuid = uuid;
+            this.mSocketType = secure ? "Secure" : "Insecure";
             BluetoothServerSocket tmp = null;
-            mSocketType = secure ? "Secure" : "Insecure";
 
             // Create a new listening server socket
             try {
                 if (secure) {
-                    tmp = mAdapter.listenUsingRfcommWithServiceRecord("secure",
-                            MY_UUID_SECURE);
+                    tmp = mAdapter.listenUsingRfcommWithServiceRecord("secure", uuid);
                 } else {
-                    tmp = mAdapter.listenUsingInsecureRfcommWithServiceRecord(
-                            "inSecure", MY_UUID_INSECURE);
+                    tmp = mAdapter.listenUsingInsecureRfcommWithServiceRecord("inSecure", uuid);
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Socket Type: " + mSocketType + "listen() failed", e);
@@ -431,8 +429,7 @@ public class BluetoothChatManager {
                             case STATE_LISTEN:
                             case STATE_CONNECTING:
                                 // Situation normal. Start the connected thread.
-                                connected(socket, socket.getRemoteDevice(),
-                                        mSocketType);
+                                connected(socket, socket.getRemoteDevice(), mSocketType, uuid);
                                 break;
                             case STATE_NONE:
                             case STATE_CONNECTED:
@@ -468,11 +465,13 @@ public class BluetoothChatManager {
     private class ConnectThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
+        private final UUID uuid;
         private String mSocketType;
 
         @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
-        ConnectThread(BluetoothDevice device, boolean secure) {
-            mmDevice = device;
+        ConnectThread(BluetoothDevice device, UUID uuid, boolean secure) {
+            this.mmDevice = device;
+            this.uuid = uuid;
             BluetoothSocket tmp = null;
             mSocketType = secure ? "Secure" : "Insecure";
 
@@ -481,9 +480,9 @@ public class BluetoothChatManager {
             // given BluetoothDevice
             try {
                 if (secure) {
-                    tmp = device.createRfcommSocketToServiceRecord(MY_UUID_SECURE);
+                    tmp = device.createRfcommSocketToServiceRecord(uuid);
                 } else {
-                    tmp = device.createInsecureRfcommSocketToServiceRecord(MY_UUID_INSECURE);
+                    tmp = device.createInsecureRfcommSocketToServiceRecord(uuid);
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Socket Type: " + mSocketType + "create() failed", e);
@@ -514,7 +513,7 @@ public class BluetoothChatManager {
                 } catch (IOException e2) {
                     //ignored
                 }
-                connectionFailed();
+                connectionFailed(uuid);
                 return;
             }
 
@@ -524,7 +523,7 @@ public class BluetoothChatManager {
             }
 
             // Start the connected thread
-            connected(mmSocket, mmDevice, mSocketType);
+            connected(mmSocket, mmDevice, mSocketType, uuid);
         }
     }
 
@@ -536,11 +535,13 @@ public class BluetoothChatManager {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
+        private final UUID uuid;
 
         @RequiresPermission(Manifest.permission.BLUETOOTH)
-        ConnectedThread(BluetoothSocket socket, String socketType) {
+        ConnectedThread(BluetoothSocket socket, String socketType, UUID uuid) {
             Log.d(TAG, "create ConnectedThread: " + socketType);
-            mmSocket = socket;
+            this.mmSocket = socket;
+            this.uuid = uuid;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
@@ -590,9 +591,9 @@ public class BluetoothChatManager {
 
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
-                    connectionLost();
+                    connectionLost(uuid);
                     // Start the service over to restart listening mode
-                    BluetoothChatManager.this.start();
+                    BluetoothChatManager.this.startListening(uuid);
                     break;
                 }
             }

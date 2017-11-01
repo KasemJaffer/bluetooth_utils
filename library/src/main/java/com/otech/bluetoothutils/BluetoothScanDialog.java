@@ -10,14 +10,12 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -42,7 +40,6 @@ public class BluetoothScanDialog extends DialogFragment {
 
     private static final String TAG = "BluetoothScanManager";
     private static final int REQUEST_ENABLE_BT = 232;
-    private static final int REQUEST_PERMISSION_BT = 233;
     private static final String ARGS_OPTIONS = "options";
     private static final String ARGS_MAKE_DISCOVERABLE = "discoverable";
 
@@ -240,22 +237,6 @@ public class BluetoothScanDialog extends DialogFragment {
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_PERMISSION_BT:
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    startDiscovery();
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-
-    }
-
     @NonNull
     private LinearLayout buildView() {
 
@@ -354,19 +335,9 @@ public class BluetoothScanDialog extends DialogFragment {
         return parentLayout;
     }
 
-    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN})
+    @RequiresPermission(allOf = {Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN, Manifest.permission.ACCESS_COARSE_LOCATION})
     private boolean startDiscovery() {
         Log.d(TAG, "doDiscovery()");
-
-        if (ActivityCompat.checkSelfPermission(
-                activity, Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                    REQUEST_PERMISSION_BT);
-
-            return false;
-        }
 
         if (!mBtAdapter.isEnabled()) {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);

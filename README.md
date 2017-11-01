@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.KasemJaffer:bluetooth_utils:1.0.5'
+    compile 'com.github.KasemJaffer:bluetooth_utils:1.0.6'
 }
 ```
 
@@ -69,6 +69,8 @@ To establish a connection to a BT device
 public class MainActivity extends AppCompatActivity implements BluetoothChatServiceListener {
         
    private BluetoothChatManager bService;
+   // Unique UUID for this application
+   private final UUID chatUUID = UUID.fromString("8ce255c0-200a-11e0-ac64-0800212c9a66");
         
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -77,8 +79,12 @@ public class MainActivity extends AppCompatActivity implements BluetoothChatServ
        
    
        bService = new BluetoothChatManager(this, this);
-       bService.start();
+       bService.startListening(chatUUID);
        
+       
+       // And if you have the mac address you connect to using the following
+       boolean secure = true;
+       bService.connectDevice("FF:23:CE:34:F3:67", chatUUID, secure);
    }
                 
    @Override
