@@ -10,6 +10,8 @@ import android.content.IntentFilter;
 import android.support.annotation.RequiresPermission;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 
@@ -20,6 +22,7 @@ public class BluetoothScanManager {
     private Context context;
     private BluetoothAdapter mBtAdapter;
     private OnBluetoothScanEventListener mOnBluetoothScanEventListener;
+    private List<String> macAddresses = new ArrayList<>();
 
     /**
      * The BroadcastReceiver that listens for discovered devices and changes the title when
@@ -36,7 +39,8 @@ public class BluetoothScanManager {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d(TAG, "onNewDeviceFound()-> " + device);
 
-                if (mOnBluetoothScanEventListener != null) {
+                if (!macAddresses.contains(device.getAddress()) && mOnBluetoothScanEventListener != null) {
+                    macAddresses.add(device.getAddress());
                     mOnBluetoothScanEventListener.onNewDeviceFound(device);
                 }
                 // When discovery is finished, change the Activity title
