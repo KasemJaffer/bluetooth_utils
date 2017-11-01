@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.KasemJaffer:bluetooth_utils:1.0.6'
+    compile 'com.github.KasemJaffer:bluetooth_utils:1.0.7'
 }
 ```
 
@@ -77,13 +77,15 @@ public class MainActivity extends AppCompatActivity implements BluetoothChatServ
        super.onCreate(savedInstanceState);
        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
        
-   
+      
        bService = new BluetoothChatManager(this, this);
-       bService.startListening(chatUUID);
+       
+       // To start listening for incoming connection requests
+       boolean secure = true;
+       bService.startListening(chatUUID, secure);
        
        
        // And if you have the mac address you connect to using the following
-       boolean secure = true;
        bService.connectDevice("FF:23:CE:34:F3:67", chatUUID, secure);
    }
                 
@@ -117,8 +119,8 @@ public class MainActivity extends AppCompatActivity implements BluetoothChatServ
     }
 
     @Override
-    public void chatServiceLog(String log) {
-        Toast.makeText(MainActivity.this, log, Toast.LENGTH_SHORT).show();
+    public void chatError(String message) {
+        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
     }
         
 }
