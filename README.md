@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements
 }
 ```
 
-To establish a connection to a BT device
+To establish a connection to a BT device using RFCOMM
 ------------------------
 
 ```java
